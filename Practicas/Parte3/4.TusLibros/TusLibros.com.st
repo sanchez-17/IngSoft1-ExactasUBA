@@ -113,7 +113,7 @@ test07AssertThatCantRemoveABookThatIsNotInTheCart
 	do: [:anError | self assert: anError messageText equals: Cart invalidQuantityOfBooksToRemove.
 		self assert: aCart listCart equals: ''.] ! !
 
-!CartTest methodsFor: 'as yet unclassified' stamp: 'br 6/1/2024 21:44:13'!
+!CartTest methodsFor: 'as yet unclassified' stamp: 'GS 6/3/2024 15:59:32'!
 test08AssertThatCantAddToCartABookThatIsNotInTheCatalog
 
 	|aCart|
@@ -125,7 +125,36 @@ test08AssertThatCantAddToCartABookThatIsNotInTheCatalog
 	on: Error - MessageNotUnderstood
 	do: [:anError | self assert: anError messageText equals: Cart cantAddToCartABookThatIsNotInTheCatalog.
 		self assert: aCart listCart equals: ''.
-		self deny: (aCart containsInTheCatalog: #aBook1)] ! !
+		self deny: (aCart isInTheCatalog: #aBook1)] ! !
+
+!CartTest methodsFor: 'as yet unclassified' stamp: 'GS 6/3/2024 16:04:34'!
+test09AssertThatRemoveFromCatalogRemoveTheseBooksFromTheCart
+
+	|aCart|
+	
+	aCart := Cart new.
+	
+	aCart addToCatalog: #aBook1.
+	
+	aCart addToCart: #aBook1 withQuantity: 3. 
+	
+	aCart removeFromCatalog: #aBook1.
+	
+	self deny: (aCart isInTheCatalog:  #aBook1).
+	self assert: aCart isEmpty.! !
+
+!CartTest methodsFor: 'as yet unclassified' stamp: 'GS 6/3/2024 16:10:57'!
+test10RemoveFromCatalogABookThatIsNotInItRaiseError
+
+	|aCart|
+	
+	aCart := Cart new.
+	
+	[aCart removeFromCatalog: #aBook1.
+		self fail.]
+	on: Error - MessageNotUnderstood
+	do: [:anError | self assert: anError messageText equals: Cart cantRemoveFromCatalogABookThatIsNotInTheCatalog.
+		] ! !
 
 
 !classDefinition: #Cart category: #'TusLibros.com'!
@@ -154,15 +183,15 @@ addToCatalog: aBook
 	
 	catalog add: aBook. ! !
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'br 6/1/2024 21:43:41'!
-containsInTheCatalog: aBook 
-	
-	^catalog includes: aBook.! !
-
 !Cart methodsFor: 'as yet unclassified' stamp: 'br 6/1/2024 15:59:28'!
 isEmpty
 
 	^books isEmpty! !
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'GS 6/3/2024 15:59:32'!
+isInTheCatalog: aBook 
+	
+	^catalog includes: aBook.! !
 
 !Cart methodsFor: 'as yet unclassified' stamp: 'br 6/1/2024 18:35:36'!
 isMinor: actualQuantity than: aBookQuantityToRemove
@@ -194,6 +223,15 @@ removeFromCart: aBook withQuantity: aBookQuantityToRemove
 	
 	books at: aBook put: (actualQuantity - aBookQuantityToRemove).! !
 
+!Cart methodsFor: 'as yet unclassified' stamp: 'GS 6/3/2024 16:09:14'!
+removeFromCatalog: aBook
+
+	catalog remove: aBook ifAbsent: [self error: self class cantRemoveFromCatalogABookThatIsNotInTheCatalog ]. 
+	books removeKey: aBook.
+	
+	
+	! !
+
 
 !Cart methodsFor: 'initialization' stamp: 'br 6/1/2024 21:30:06'!
 initialize
@@ -211,6 +249,10 @@ Cart class
 cantAddToCartABookThatIsNotInTheCatalog
 
 	^'You cant add to a cart a book that is not in the catalog!!!!'! !
+
+!Cart class methodsFor: 'as yet unclassified' stamp: 'GS 6/3/2024 16:08:08'!
+cantRemoveFromCatalogABookThatIsNotInTheCatalog
+	^'cant remove from catalog a book that is not in it!!!!'! !
 
 !Cart class methodsFor: 'as yet unclassified' stamp: 'br 6/1/2024 18:23:26'!
 invalidQuantityOfBooksToRemove
